@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Country Sample</string>
+    <string name="search_content_description">Search</string>
+    <string name="capital">Capital:</string>
+    <string name="population">Population:</string>
+    <string name="area">Area:</string>
+    <string name="region">Region:</string>
+    <string name="subregion">Subregion:</string>
+    <string name="back_content_description">Navigate back</string>
+    <string name="search">Search</string>
+    <string name="generic_error_title">Oops!</string>
+    <string name="generic_error_message">Something went wrong.</string>
+    <string name="cta_ok">OK</string>
+    <string name="clear_search_content_description">Clear search</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="base_api_url" translatable="false">https://restcountries.com/v3.1/</string>
+    <bool name="allow_logging">true</bool>
+</resources>
