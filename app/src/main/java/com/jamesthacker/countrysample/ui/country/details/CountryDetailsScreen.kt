@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.jamesthacker.countrysample.R
 import com.jamesthacker.countrysample.domain.model.CountryDetails
+import com.jamesthacker.countrysample.domain.model.LatLng
 import com.jamesthacker.countrysample.domain.result.DomainError
 import com.jamesthacker.countrysample.ext.on
 import com.jamesthacker.countrysample.ui.common.AppTopBar
@@ -42,14 +44,18 @@ fun CountryDetailsScreen(
     val uiState = viewModel.uiState.collectAsState().value
     CountryDetailsContent(
         uiState = uiState,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onOpenGoogleMaps = {
+            viewModel.onOpenGoogleMaps(it)
+        }
     )
 }
 
 @Composable
 private fun CountryDetailsContent(
     uiState: CountryDetailsViewModel.UiState,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onOpenGoogleMaps: (LatLng) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -79,7 +85,8 @@ private fun CountryDetailsContent(
                     details,
                     modifier = Modifier.on(!uiState.loading) {
                         padding(top = Dimens.xSmall)
-                    }
+                    },
+                    onOpenGoogleMaps = onOpenGoogleMaps,
                 )
             }
         }
@@ -94,6 +101,7 @@ private fun CountryDetailsContent(
 private fun CountryDetailsSection(
     countryDetails: CountryDetails?,
     modifier: Modifier = Modifier,
+    onOpenGoogleMaps: (LatLng) -> Unit
 ) {
     if (countryDetails != null) {
         Column(
@@ -127,6 +135,14 @@ private fun CountryDetailsSection(
                 key = stringResource(R.string.subregion),
                 value = countryDetails.subregion
             )
+
+            countryDetails.latLng?.let {
+                Button(onClick = {
+                    onOpenGoogleMaps(it)
+                }) {
+                    Text(stringResource(R.string.open_in_google_maps))
+                }
+            }
         }
     }
 }
@@ -160,10 +176,12 @@ fun PreviewCountryDetailsScreen() {
                     population = "45376763",
                     area = "2780400.0",
                     region = "Americas",
-                    subregion = "South America"
+                    subregion = "South America",
+                    latLng = LatLng(0.0, 0.0),
                 )
             ),
         ),
-        onNavigateBack = {}
+        onNavigateBack = {},
+        onOpenGoogleMaps = {},
     )
 }

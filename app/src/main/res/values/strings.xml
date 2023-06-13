@@ -12,4 +12,6 @@
     <string name="generic_error_message">Something went wrong.</string>
     <string name="cta_ok">OK</string>
     <string name="clear_search_content_description">Clear search</string>
+    <string name="open_in_google_maps">Open in Google Maps</string>
+    <string name="open_google_maps_error">Unable to open Google Maps</string>
 </resources>

@@ -6,5 +6,6 @@ data class CountryDetails(
     val population: String,
     val area: String,
     val region: String,
-    val subregion: String
+    val subregion: String,
+    val latLng: LatLng?
 )

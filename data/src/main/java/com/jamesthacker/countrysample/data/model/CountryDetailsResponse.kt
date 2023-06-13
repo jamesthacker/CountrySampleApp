@@ -10,6 +10,7 @@ data class CountryDetailsResponse(
     val region: String? = null,
     val subregion: String? = null,
     val name: CountryNameDetails? = null,
+    val latlng: List<Double> = listOf(),
 ) {
     @Serializable
     data class CountryNameDetails(

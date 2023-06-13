@@ -3,7 +3,9 @@ package com.jamesthacker.countrysample.ui.country.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jamesthacker.countrysample.common.IntentManager
 import com.jamesthacker.countrysample.domain.model.CountryDetails
+import com.jamesthacker.countrysample.domain.model.LatLng
 import com.jamesthacker.countrysample.domain.repository.CountryRepository
 import com.jamesthacker.countrysample.domain.result.DomainError
 import com.jamesthacker.countrysample.domain.result.DomainResult
@@ -19,6 +21,7 @@ import javax.inject.Inject
 class CountryDetailsViewModel @Inject constructor(
     private val repository: CountryRepository,
     savedStateHandle: SavedStateHandle,
+    private val intentManager: IntentManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -63,6 +66,10 @@ class CountryDetailsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun onOpenGoogleMaps(latLng: LatLng) {
+        intentManager.openGoogleMaps(latLng)
     }
 
     data class UiState(

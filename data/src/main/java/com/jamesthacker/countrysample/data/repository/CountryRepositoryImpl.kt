@@ -5,6 +5,7 @@ import com.jamesthacker.countrysample.data.R
 import com.jamesthacker.countrysample.data.api.ApiClient
 import com.jamesthacker.countrysample.data.api.CountryApi
 import com.jamesthacker.countrysample.domain.model.CountryDetails
+import com.jamesthacker.countrysample.domain.model.LatLng
 import com.jamesthacker.countrysample.domain.repository.CountryRepository
 import com.jamesthacker.countrysample.domain.result.DomainResult
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -33,12 +34,20 @@ class CountryRepositoryImpl @Inject constructor(
                         it.population?.toString().orEmpty(),
                         it.area?.toString().orEmpty(),
                         it.region.orEmpty(),
-                        it.subregion.orEmpty()
+                        it.subregion.orEmpty(),
+                        it.latlng.toLatLng()
                     )
                 }
-
             }
         )
         return response
+    }
+
+    private fun List<Double>.toLatLng(): LatLng? {
+        return if (this.size == 2) {
+            LatLng(first(), last())
+        } else {
+            null
+        }
     }
 }
