@@ -26,7 +26,7 @@ class CountryListViewModel @Inject constructor(
         refreshCountries()
     }
 
-    fun refreshCountries() {
+    private fun refreshCountries() {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(loading = true)
@@ -36,12 +36,19 @@ class CountryListViewModel @Inject constructor(
                 is DomainResult.Success -> {
                     allCountries = result.data
                     _uiState.update {
-                        it.copy(loading = false, countries = result.data.filterForSearchTerm(it.searchInput))
+                        it.copy(
+                            loading = false,
+                            countries = result.data.filterForSearchTerm(it.searchInput),
+                            error = null
+                        )
                     }
                 }
                 is DomainResult.Error -> {
                     _uiState.update {
-                        it.copy(loading = false, error = result.error)
+                        it.copy(
+                            loading = false,
+                            error = result.error
+                        )
                     }
                 }
             }
@@ -56,7 +63,10 @@ class CountryListViewModel @Inject constructor(
 
     fun onSearchUpdated(searchInput: String) {
         _uiState.update {
-            it.copy(searchInput = searchInput, countries = allCountries.filterForSearchTerm(searchInput))
+            it.copy(
+                searchInput = searchInput,
+                countries = allCountries.filterForSearchTerm(searchInput)
+            )
         }
     }
 

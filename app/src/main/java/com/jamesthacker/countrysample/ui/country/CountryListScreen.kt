@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.jamesthacker.countrysample.R
 import com.jamesthacker.countrysample.ui.common.AppTopBar
+import com.jamesthacker.countrysample.ui.common.ErrorDialog
 import com.jamesthacker.countrysample.ui.theme.Dimens
 
 @Composable
@@ -30,13 +32,11 @@ fun CountryListScreen(
     onNavigateToCountryDetails: (String) -> Unit,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    CountryListContent(
-        uiState = uiState,
+    CountryListContent(uiState = uiState,
         onItemClick = onNavigateToCountryDetails,
         onSearchUpdated = {
             viewModel.onSearchUpdated(it)
-        }
-    )
+        })
 }
 
 @Composable
@@ -49,61 +49,69 @@ private fun CountryListContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(Dimens.medium)
     ) {
         AppTopBar(
-            title = "Countries",
-            navigationIcon = null,
-            navButtonContentDescription = null
+            title = "Countries", navigationIcon = null, navButtonContentDescription = null
         )
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = uiState.searchInput,
-            placeholder = {
-                Text(stringResource(R.string.search))
-            },
-            onValueChange = {
-                onSearchUpdated(it)
-            },
-            leadingIcon = {
-                Icon(Icons.Default.Search, stringResource(R.string.search_content_description))
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    onSearchUpdated("")
-                }) {
-                    Icon(
-                        Icons.Default.Clear,
-                        stringResource(R.string.clear_search_content_description)
-                    )
-                }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = Dimens.medium)
+        ) {
+
+            if (uiState.loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
-        )
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(uiState.countries.size) { index ->
-                val countryName = uiState.countries[index]
-                CountryItem(name = countryName) {
-                    onItemClick.invoke(it)
+            SearchInput(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.searchInput,
+                onSearchUpdated = onSearchUpdated
+            )
+
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(uiState.countries.size) { index ->
+                    val countryName = uiState.countries[index]
+                    CountryItem(name = countryName) {
+                        onItemClick.invoke(it)
+                    }
                 }
             }
         }
     }
+
+    ErrorDialog(uiState.error) {}
+}
+
+@Composable
+private fun SearchInput(
+    value: String, modifier: Modifier = Modifier, onSearchUpdated: (String) -> Unit
+) {
+    OutlinedTextField(modifier = modifier, value = value, placeholder = {
+        Text(stringResource(R.string.search))
+    }, onValueChange = {
+        onSearchUpdated(it)
+    }, leadingIcon = {
+        Icon(Icons.Default.Search, stringResource(R.string.search_content_description))
+    }, trailingIcon = {
+        IconButton(onClick = {
+            onSearchUpdated("")
+        }) {
+            Icon(
+                Icons.Default.Clear, stringResource(R.string.clear_search_content_description)
+            )
+        }
+    })
 }
 
 @Composable
 private fun CountryItem(
-    name: String,
-    modifier: Modifier = Modifier,
-    onClick: (String) -> Unit
+    name: String, modifier: Modifier = Modifier, onClick: (String) -> Unit
 ) {
-    TextButton(
-        modifier = modifier,
-        onClick = {
-            onClick.invoke(name)
-        }
-    ) {
+    TextButton(modifier = modifier, onClick = {
+        onClick.invoke(name)
+    }) {
         Text(name)
     }
 }
@@ -111,11 +119,7 @@ private fun CountryItem(
 @Preview
 @Composable
 private fun PreviewCountryListContent() {
-    CountryListContent(
-        uiState = CountryListViewModel.UiState(
-            countries = listOf("Country 1", "Country 2", "Country 3")
-        ),
-        onItemClick = {},
-        onSearchUpdated = {}
-    )
+    CountryListContent(uiState = CountryListViewModel.UiState(
+        countries = listOf("Country 1", "Country 2", "Country 3")
+    ), onItemClick = {}, onSearchUpdated = {})
 }

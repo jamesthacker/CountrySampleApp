@@ -1,6 +1,5 @@
 package com.jamesthacker.countrysample.data.api
 
-import androidx.annotation.VisibleForTesting
 import com.jamesthacker.countrysample.domain.result.DomainError
 import com.jamesthacker.countrysample.domain.result.DomainResult
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,6 +44,5 @@ class ApiClient @Inject constructor() {
         }
     }
 
-    @VisibleForTesting
-    internal var networkDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val networkDispatcher: CoroutineDispatcher = Dispatchers.IO
 }

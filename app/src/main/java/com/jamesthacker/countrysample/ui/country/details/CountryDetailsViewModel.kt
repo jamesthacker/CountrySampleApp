@@ -24,7 +24,6 @@ class CountryDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-
     private val countryName = savedStateHandle.get<String>(NavRoutes.ARG_COUNTRY_NAME).orEmpty()
 
     init {
@@ -36,7 +35,7 @@ class CountryDetailsViewModel @Inject constructor(
         refresh()
     }
 
-    fun refresh() {
+    private fun refresh() {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
@@ -48,7 +47,8 @@ class CountryDetailsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             loading = false,
-                            countryDetails = result.data
+                            countryDetails = result.data,
+                            error = null
                         )
                     }
                 }
