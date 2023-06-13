@@ -1,7 +1,9 @@
 package com.jamesthacker.countrysample.ui.country.details
 
 import androidx.lifecycle.SavedStateHandle
+import com.jamesthacker.countrysample.domain.model.Country
 import com.jamesthacker.countrysample.domain.model.CountryDetails
+import com.jamesthacker.countrysample.domain.model.LatLng
 import com.jamesthacker.countrysample.domain.repository.CountryRepository
 import com.jamesthacker.countrysample.domain.result.DomainError
 import com.jamesthacker.countrysample.domain.result.DomainResult
@@ -11,6 +13,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -23,7 +26,7 @@ import org.junit.Test
 class CountryDetailsViewModelTest {
 
     private lateinit var viewModel: CountryDetailsViewModel
-    private val countryRepository: CountryRepository = mockk()
+    private val countryRepository: CountryRepository = mockk(relaxUnitFun = true)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
@@ -33,19 +36,29 @@ class CountryDetailsViewModelTest {
 
     @Test
     fun givenViewModelIsInitializedThenCountryDetailsIsRefreshed() = runTest {
-        coEvery { countryRepository.getCountryByName(any()) } returns DomainResult.Success(
-            listOf(
-                CountryDetails(
-                    "Country Name",
-                    "Capital",
-                    "Population",
-                    "area",
-                    "region",
-                    "Subregion"
+        coEvery { countryRepository.observeCountryDetails() } returns MutableStateFlow(
+            DomainResult.Success(
+                Country(
+                    "Country 1",
+                    listOf(
+                        CountryDetails(
+                            "Country Name",
+                            "Capital",
+                            "Population",
+                            "area",
+                            "region",
+                            "Subregion",
+                            LatLng(1.0, 2.0)
+                        )
+                    )
                 )
             )
         )
-        viewModel = CountryDetailsViewModel(countryRepository, SavedStateHandle(mapOf(NavRoutes.ARG_COUNTRY_NAME to "Country 1")))
+        viewModel = CountryDetailsViewModel(
+            countryRepository,
+            SavedStateHandle(mapOf(NavRoutes.ARG_COUNTRY_NAME to "Country 1")),
+            mockk()
+        )
         advanceUntilIdle()
 
         coVerify { countryRepository.getCountryByName("Country 1") }
@@ -57,7 +70,8 @@ class CountryDetailsViewModelTest {
                     "Population",
                     "area",
                     "region",
-                    "Subregion"
+                    "Subregion",
+                    LatLng(1.0, 2.0)
                 )
             ),
             viewModel.uiState.value.countryDetails
@@ -66,10 +80,16 @@ class CountryDetailsViewModelTest {
 
     @Test
     fun givenDetailsEncountersErrorThenErrorIsDisplayed() = runTest {
-        coEvery { countryRepository.getCountryByName(any()) } returns DomainResult.Error(
-            DomainError.Unknown
+        coEvery { countryRepository.observeCountryDetails() } returns MutableStateFlow(
+            DomainResult.Error(
+                DomainError.Unknown
+            )
         )
-        viewModel = CountryDetailsViewModel(countryRepository, SavedStateHandle(mapOf(NavRoutes.ARG_COUNTRY_NAME to "Country 1")))
+        viewModel = CountryDetailsViewModel(
+            countryRepository,
+            SavedStateHandle(mapOf(NavRoutes.ARG_COUNTRY_NAME to "Country 1")),
+            mockk()
+        )
         advanceUntilIdle()
 
         coVerify { countryRepository.getCountryByName("Country 1") }

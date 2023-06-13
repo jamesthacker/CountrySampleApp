@@ -12,7 +12,7 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -53,6 +53,11 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.serialization.converter)
     implementation(libs.timber)
+
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    kapt(libs.room.compiler)
+    implementation(libs.room.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.rules)

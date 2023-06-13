@@ -33,6 +33,7 @@ class CountryListViewModel @Inject constructor(
             }
 
             when(val result = countryRepository.getCountryList()) {
+                is DomainResult.Uninitialized -> {}
                 is DomainResult.Success -> {
                     allCountries = result.data
                     _uiState.update {

@@ -1,7 +1,7 @@
 package com.jamesthacker.countrysample.domain.model
 
 data class CountryDetails(
-    val name: String,
+    val commonName: String,
     val capital: String,
     val population: String,
     val area: String,

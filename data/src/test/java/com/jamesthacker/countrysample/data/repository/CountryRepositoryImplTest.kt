@@ -5,6 +5,7 @@ import com.jamesthacker.countrysample.data.api.CountryApi
 import com.jamesthacker.countrysample.data.mockContext
 import com.jamesthacker.countrysample.data.model.CountryDetailsResponse
 import com.jamesthacker.countrysample.domain.model.CountryDetails
+import com.jamesthacker.countrysample.domain.model.LatLng
 import com.jamesthacker.countrysample.domain.result.DomainError
 import com.jamesthacker.countrysample.domain.result.DomainResult
 import io.mockk.coEvery
@@ -28,7 +29,8 @@ class CountryRepositoryImplTest {
         repository = CountryRepositoryImpl(
             mockContext,
             ApiClient(),
-            countryApi
+            countryApi,
+            mockk(relaxed = true)
         )
     }
 
@@ -42,27 +44,32 @@ class CountryRepositoryImplTest {
                     population = 456,
                     region = "region",
                     subregion = "subregion",
-                    name = CountryDetailsResponse.CountryNameDetails("Common name")
+                    name = CountryDetailsResponse.CountryNameDetails("Common name"),
+                    latlng = listOf(
+                        0.0, 1.0,
+                    )
                 )
             )
             coEvery { countryApi.getCountryDetails(any()) } returns (Response.success(mockResponse))
 
-            val result = repository.getCountryByName("country")
+            repository.getCountryByName("country")
+            val result = repository.observeCountryDetails().value
 
             coVerify { countryApi.getCountryDetails(any()) }
 
             Assert.assertTrue(result is DomainResult.Success)
             val data = (result as DomainResult.Success).data
-            Assert.assertEquals(1, data.size)
-            val firstDetails = data.first()
+            Assert.assertEquals(1, data.details.size)
+            val firstDetails = data.details.first()
             Assert.assertEquals(
                 CountryDetails(
-                    name = "Common name",
+                    commonName = "Common name",
                     area = "123.0",
                     capital = "Capital 1",
                     population = "456",
                     region = "region",
                     subregion = "subregion",
+                    latLng = LatLng(0.0, 1.0)
                 ),
                 firstDetails
             )
@@ -73,11 +80,53 @@ class CountryRepositoryImplTest {
         runTest {
             coEvery { countryApi.getCountryDetails(any()) } throws UnknownHostException()
 
-            val result = repository.getCountryByName("country")
+            repository.getCountryByName("country")
+            val result = repository.observeCountryDetails().value
             coVerify { countryApi.getCountryDetails(any()) }
 
             Assert.assertTrue(result is DomainResult.Error)
             val error = (result as DomainResult.Error).error
             Assert.assertTrue(error is DomainError.NetworkError)
+        }
+
+    @Test
+    fun givenLatLngListIsMalformedThenDomainLatLngIsNull() =
+        runTest {
+            val mockResponse = listOf(
+                CountryDetailsResponse(
+                    area = 123.0,
+                    capital = listOf("Capital 1", "Capital 2"),
+                    population = 456,
+                    region = "region",
+                    subregion = "subregion",
+                    name = CountryDetailsResponse.CountryNameDetails("Common name"),
+                    latlng = listOf(
+                        0.0, 1.0, 2.0, 3.0
+                    )
+                )
+            )
+            coEvery { countryApi.getCountryDetails(any()) } returns (Response.success(mockResponse))
+
+            repository.getCountryByName("country")
+            val result = repository.observeCountryDetails().value
+
+            coVerify { countryApi.getCountryDetails(any()) }
+
+            Assert.assertTrue(result is DomainResult.Success)
+            val data = (result as DomainResult.Success).data
+            Assert.assertEquals(1, data.details.size)
+            val firstDetails = data.details.first()
+            Assert.assertEquals(
+                CountryDetails(
+                    commonName = "Common name",
+                    area = "123.0",
+                    capital = "Capital 1",
+                    population = "456",
+                    region = "region",
+                    subregion = "subregion",
+                    latLng = null
+                ),
+                firstDetails
+            )
         }
 }
