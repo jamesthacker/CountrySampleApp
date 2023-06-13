@@ -57,7 +57,7 @@ class CountryListViewModel @Inject constructor(
 
     private fun List<String>.filterForSearchTerm(searchTerm: String): List<String> {
         return filter {
-            it.contains(searchTerm)
+            it.contains(searchTerm, ignoreCase = true)
         }
     }
 
